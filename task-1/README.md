@@ -8,19 +8,19 @@ and `postgres.js`.
 
 ## Endpoints
 
-Every endpoint needs the `X-API-Key` header. Errors are always `{"error": "..."}`.
+All API routes live under `/api`, so the API base URL is `https://<host>/api`. Every endpoint below needs the `X-API-Key` header. Errors are always `{"error": "..."}`.
 
 | Method | Path | Notes |
 |---|---|---|
-| `POST` | `/reset` | `{"slots": [...]}` deletes every booking and replaces all slots |
-| `GET` | `/slots?provider=` | Every slot, earliest first, with `available` |
-| `POST` | `/bookings` | `{slot_id, name, email}`, optional `Idempotency-Key` header |
-| `GET` | `/bookings?email=&limit=&cursor=` | A person's bookings, oldest first, cursor-paginated |
-| `GET` | `/bookings/:id` | One booking |
-| `DELETE` | `/bookings/:id` | Cancels it and frees the slot |
+| `POST` | `/api/reset` | `{"slots": [...]}` deletes every booking and replaces all slots |
+| `GET` | `/api/slots?provider=` | Every slot, earliest first, with `available` |
+| `POST` | `/api/bookings` | `{slot_id, name, email}`, optional `Idempotency-Key` header |
+| `GET` | `/api/bookings?email=&limit=&cursor=` | A person's bookings, oldest first, cursor-paginated |
+| `GET` | `/api/bookings/:id` | One booking |
+| `DELETE` | `/api/bookings/:id` | Cancels it and frees the slot |
 
-`GET /` serves the booking page. It asks for the API key once and keeps it in that browser.
-`GET /health` is public.
+`GET /` serves the booking page, outside `/api`. It asks for the API key once and keeps it in that browser.
+`GET /api/health` is public.
 
 ## How each level is met
 
@@ -58,7 +58,7 @@ never gets committed. Use the same value for `API_KEY` on Vercel, and send it as
 cp .env.example .env          # then set DATABASE_URL, and API_KEY as described above
 npm install
 npm run db:migrate            # creates the tables
-npm run dev                   # http://localhost:3000
+npm run dev                   # page at http://localhost:3000, API at http://localhost:3000/api
 ```
 
 For a throwaway database:
@@ -67,10 +67,10 @@ For a throwaway database:
 ## Check every level
 
 ```sh
-BASE_URL=http://localhost:3000 API_KEY=... npm run check
+BASE_URL=http://localhost:3000/api API_KEY=... npm run check
 ```
 
-**Warning:** this calls `POST /reset`, which wipes all slots and bookings on that deployment.
+**Warning:** this calls `POST /api/reset`, which wipes all slots and bookings on that deployment.
 
 ## Deploy (Vercel + Neon)
 
@@ -79,7 +79,7 @@ BASE_URL=http://localhost:3000 API_KEY=... npm run check
 3. Deploy: `npx vercel link`, then
    `npx vercel env add DATABASE_URL production`, `npx vercel env add API_KEY production`,
    then `npx vercel --prod`.
-4. Run the check against the production URL, then call `POST /reset` with the slots you want to leave in place.
+4. Run the check against the production API base (`https://<host>/api`), then call `POST /api/reset` with the slots you want to leave in place.
 
 After a schema change, run `npm run db:generate` to write a new migration to `src/db/migrations/`,
 then `npm run db:migrate`.

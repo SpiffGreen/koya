@@ -156,7 +156,7 @@ export const page = /* html */ `<!doctype html>
     const list = $("slotList");
     if (!apiKey) { list.textContent = "Enter the clinic API key above to see times."; return; }
     try {
-      const all = (await api("/slots")).slots;
+      const all = (await api("/api/slots")).slots;
       const providers = [...new Set(all.map((s) => s.provider))].sort();
       const sel = $("provider"), current = sel.value;
       sel.innerHTML = '<option value="">All providers</option>' + providers.map((p) => '<option>' + esc(p) + "</option>").join("");
@@ -203,7 +203,7 @@ export const page = /* html */ `<!doctype html>
     const btn = $("bookBtn");
     btn.disabled = true;
     try {
-      const booking = await api("/bookings", {
+      const booking = await api("/api/bookings", {
         method: "POST",
         headers: { "Idempotency-Key": idemKey },
         body: JSON.stringify({ slot_id: chosen.id, name: $("name").value, email: $("email").value }),
@@ -244,7 +244,7 @@ export const page = /* html */ `<!doctype html>
     const box = btn.parentElement;
     btn.disabled = true;
     try {
-      const b = await api("/bookings/" + encodeURIComponent(btn.dataset.cancel), { method: "DELETE" });
+      const b = await api("/api/bookings/" + encodeURIComponent(btn.dataset.cancel), { method: "DELETE" });
       box.innerHTML = bookingHtml(b);
       msg(box.querySelector(".cancelMsg"), "ok", "Booking cancelled. The time is open again.");
       loadSlots();
@@ -255,7 +255,7 @@ export const page = /* html */ `<!doctype html>
     const id = $("lookupId").value.trim();
     const out = $("lookupOut");
     if (!id) return;
-    try { out.innerHTML = '<div style="margin-top:14px">' + bookingHtml(await api("/bookings/" + encodeURIComponent(id))) + "</div>"; }
+    try { out.innerHTML = '<div style="margin-top:14px">' + bookingHtml(await api("/api/bookings/" + encodeURIComponent(id))) + "</div>"; }
     catch (e) { msg(out, "error", e.status === 404 ? "No booking with that ID." : e.message); }
   });
 
@@ -266,7 +266,7 @@ export const page = /* html */ `<!doctype html>
     const q = new URLSearchParams({ email, limit: "5" });
     if (mineCursor) q.set("cursor", mineCursor);
     try {
-      const page = await api("/bookings?" + q);
+      const page = await api("/api/bookings?" + q);
       if (reset && !page.bookings.length) $("mineList").innerHTML = '<li class="muted">No bookings for that email.</li>';
       for (const b of page.bookings) {
         const slot = slots.find((s) => s.id === b.slot_id);

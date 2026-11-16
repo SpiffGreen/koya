@@ -1,10 +1,10 @@
 // End-to-end check of every level against a running deployment.
-//   BASE_URL=https://your-app.vercel.app API_KEY=... npm run check
+//   BASE_URL=https://your-app.vercel.app/api API_KEY=... npm run check
 // WARNING: this calls POST /reset, which deletes every booking and slot on that deployment.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
-const BASE = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const BASE = (process.env.BASE_URL ?? "http://localhost:3000/api").replace(/\/$/, "");
 const KEY = process.env.API_KEY ?? "";
 const run = randomUUID().slice(0, 8);
 
